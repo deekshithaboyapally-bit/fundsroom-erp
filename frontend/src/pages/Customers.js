@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+const API_URL = 'https://fundsroom-erp-cm0q.onrender.com';
+
 const Customers = () => {
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState('');
@@ -14,26 +16,25 @@ const Customers = () => {
     status: 'Lead', follow_up_date: '', notes: ''
   });
 
-  const fetchCustomers = async () => {
-    try {
-      const res = await axios.get(`https://fundsroom-erp-cm0q.onrender.com/customers?search=${search}`);
-      setCustomers(res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/customers?search=${search}`);
+        setCustomers(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
     fetchCustomers();
   }, [search]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('https://fundsroom-erp-cm0q.onrender.com/customers', form);
+      await axios.post(`${API_URL}/customers`, form);
       alert('Customer added ✅');
       setShowForm(false);
-      fetchCustomers();
+      window.location.reload();
     } catch (err) {
       alert('Error adding customer ❌');
     }
