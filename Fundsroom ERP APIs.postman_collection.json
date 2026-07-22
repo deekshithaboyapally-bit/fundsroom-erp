@@ -1,0 +1,206 @@
+{
+  "info": {
+    "_postman_id": "93eee91a-ab9c-4231-a4dc-49ef87b1d41a",
+    "name": "Fundsroom ERP APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "56808129",
+    "_collection_link": "https://go.postman.co/collection/56808129-93eee91a-ab9c-4231-a4dc-49ef87b1d41a?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "login",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"admin@test.com\",\r\n  \"password\": \"Admin@123\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://fundsroom-erp-cm0q.onrender.com/auth/login",
+          "protocol": "https",
+          "host": [
+            "fundsroom-erp-cm0q",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Customers",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://fundsroom-erp-cm0q.onrender.com/customers",
+          "protocol": "https",
+          "host": [
+            "fundsroom-erp-cm0q",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "customers"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add Customer",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"name\": \"Test Customer\",\r\n  \"mobile\": \"9999999999\",\r\n  \"email\": \"test@cust.com\",\r\n  \"business_name\": \"Test Biz\",\r\n  \"gst_number\": \"GST123\",\r\n  \"customer_type\": \"Wholesale\",\r\n  \"address\": \"Hyderabad\",\r\n  \"status\": \"Active\",\r\n  \"follow_up_date\": \"2026-07-25\",\r\n  \"notes\": \"First call done\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://fundsroom-erp-cm0q.onrender.com/customers",
+          "protocol": "https",
+          "host": [
+            "fundsroom-erp-cm0q",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "customers"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Products",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://fundsroom-erp-cm0q.onrender.com/products",
+          "protocol": "https",
+          "host": [
+            "fundsroom-erp-cm0q",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "products"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add Product",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"name\": \"Test Product\",\r\n  \"sku\": \"SKU002\",\r\n  \"category\": \"Electronics\",\r\n  \"unit_price\": 500,\r\n  \"current_stock\": 100,\r\n  \"min_stock_alert\": 10,\r\n  \"location\": \"Warehouse A\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://fundsroom-erp-cm0q.onrender.com/products",
+          "protocol": "https",
+          "host": [
+            "fundsroom-erp-cm0q",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "products"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Challans",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://fundsroom-erp-cm0q.onrender.com/challans",
+          "protocol": "https",
+          "host": [
+            "fundsroom-erp-cm0q",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "challans"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Challan",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"customer_id\": 1,\r\n  \"created_by\": 1,\r\n  \"status\": \"Confirmed\",\r\n  \"items\": [\r\n    {\r\n      \"product_id\": 1,\r\n      \"quantity\": 5\r\n    }\r\n  ]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://fundsroom-erp-cm0q.onrender.com/challans",
+          "protocol": "https",
+          "host": [
+            "fundsroom-erp-cm0q",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "challans"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
