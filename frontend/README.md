@@ -1,70 +1,213 @@
-# Getting Started with Create React App
+# Fundsroom ERP + CRM Portal
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A Mini ERP and CRM system built for a wholesale distribution company. 
+This system helps internal teams manage customers, products, stock, 
+and sales challans from a single platform.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 🔗 Live Links
 
-### `npm start`
+- **Frontend:** https://fundsroom-erp-jqbw.vercel.app
+- **Backend:** https://fundsroom-erp-cm0q.onrender.com
+- **GitHub:** https://github.com/deekshithaboyapally-bit/fundsroom-erp
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🛠 Tech Stack
 
-### `npm test`
+### Backend
+- Node.js
+- Express.js
+- PostgreSQL (Neon)
+- JWT Authentication
+- REST APIs
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### Frontend
+- React.js
+- Axios
+- React Router DOM
+- Inline CSS for styling
 
 ### Deployment
+- **Frontend:** Vercel
+- **Backend:** Render
+- **Database:** Neon (PostgreSQL)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+---
 
-### `npm run build` fails to minify
+## ✨ Features Built
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### 🔐 Authentication
+- Login with email and password
+- JWT token generated on successful login
+- 4 roles supported: Admin, Sales, Warehouse, Accounts
+
+### 👥 Customer CRM
+- Add new customers with full details
+- View all customers in a table
+- Search customers by name, email, or mobile
+- Fields: Name, Mobile, Email, Business Name, GST Number, Type, Address, Status, Follow-up Date, Notes
+- Customer types: Retail, Wholesale, Distributor
+- Status options: Lead, Active, Inactive
+
+### 📦 Product & Inventory
+- Add new products with SKU, category, price, stock
+- View all products in a table
+- Search products by name or SKU
+- Low stock alert: row highlighted in yellow when stock falls below minimum alert level
+- Stock movement automatically logged when challan is confirmed
+
+### 🧾 Sales Challan
+- Create challan by selecting customer and products
+- Add multiple products in a single challan
+- Challan number auto-generated (`CHL-timestamp`)
+- Status options: Draft, Confirmed, Cancelled
+- When challan is confirmed:
+  - Stock is automatically reduced
+  - Stock cannot go below zero
+  - Proper error shown if stock is insufficient
+  - Product snapshot saved (name, SKU, price at time of sale)
+- View all challans in a table with color-coded status badges
+
+---
+
+## 🗄 Database Tables
+
+- `users`
+- `customers`
+- `products`
+- `stock_movements`
+- `challans`
+- `challan_items`
+
+---
+
+## 📁 Project Structure
+fundsroom-erp/
+├── backend/
+│ ├── index.js # Main server file with all APIs
+│ ├── package.json # Backend dependencies
+│ └── .env # Environment variables (not committed)
+├── frontend/
+│ ├── src/
+│ │ ├── pages/
+│ │ │ ├── Login.js
+│ │ │ ├── Dashboard.js
+│ │ │ ├── Customers.js
+│ │ │ ├── Products.js
+│ │ │ └── Challans.js
+│ │ └── App.js # Routing configuration
+│ └── package.json
+├── Fundsroom ERP APIs.postman_collection.json
+└── README.md
+
+---
+
+## 🚀 How to Run Locally
+
+### Step 1: Clone the repository
+```bash
+git clone https://github.com/deekshithaboyapally-bit/fundsroom-erp.git
+cd fundsroom-erp
+Step 2: Setup Backend
+cd backend
+npm install
+Create a .env file inside the backend folder:
+DATABASE_URL=your_neon_postgresql_connection_string
+PORT=5000
+Start the backend server:
+node index.js
+Backend runs at: http://localhost:5000
+Step 3: Setup Frontend
+Open a new terminal:
+cd frontend
+npm install
+npm start
+Frontend runs at: http://localhost:3000
+
+🔌 API Endpoints
+Authentication
+Method	Endpoint	Description
+POST	/auth/login	Login and get JWT token
+
+Customers
+Method	Endpoint	Description
+GET	/customers	Get all customers (supports search)
+POST	/customers	Add new customer
+GET	/customers/:id	Get customer by ID
+PUT	/customers/:id	Update customer
+POST	/customers/:id/notes	Add follow-up note
+
+Products
+Method	Endpoint	Description
+GET	/products	Get all products (supports search)
+POST	/products	Add new product
+GET	/products/:id	Get product by ID
+PUT	/products/:id	Update product
+
+Challans
+Method	Endpoint	Description
+GET	/challans	Get all challans
+POST	/challans	Create new challan
+GET	/challans/:id	Get challan with items
+PUT	/challans/:id	Update challan status
+
+
+🔑 Test Login Credentials
+Role	Email	Password
+Admin	admin@test.com	Admin@123
+Sales	sales@test.com	Sales@123
+Warehouse	warehouse@test.com	Warehouse@123
+Accounts	accounts@test.com	Accounts@123
+
+🏗 Architecture
+React (Vercel)
+     ↓ HTTP requests (Axios)
+Express REST API (Render)
+     ↓ SQL queries
+PostgreSQL (Neon Cloud)
+
+.User logs in → Backend checks DB → JWT token returned → Stored in localStorage
+.Challan confirmed → Backend starts DB transaction → Checks stock → Reduces stock → Saves items → Commits
+.If stock insufficient → Transaction rolled back → Error returned to frontend
+
+⚙ Environment Variables
+Backend (.env)
+DATABASE_URL=postgresql://...
+PORT=5000
+
+☁ Deployment Steps
+Backend (Render)
+Connect GitHub repo to Render
+Root Directory: backend
+Build Command: npm install
+Start Command: node index.js
+Add environment variable: DATABASE_URL
+
+Frontend (Vercel)
+Connect GitHub repo to Vercel
+Root Directory: frontend
+Framework: Create React App
+Deploy
+
+⚠ Known Limitations
+Passwords stored as plain text (bcrypt hashing should be added for production)
+No role-based route protection on frontend yet
+No pagination on lists (fine for small datasets)
+Challan cannot be edited or deleted after creation
+No PDF invoice export
+No product image upload
+Render free tier sleeps after inactivity (first request may take 20–30 seconds)
+
+📮 Postman Collection
+Import the file Fundsroom ERP APIs.postman_collection.json into Postman to test all APIs directly.
+
+🔮 What I Would Improve Next
+Add bcrypt password hashing
+Add role-based access control middleware
+Add pagination for large datasets
+Add PDF invoice export
+Add edit/delete functionality for challans
+Add frontend form validation
+Add unit tests for APIs
