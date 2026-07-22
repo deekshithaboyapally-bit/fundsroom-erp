@@ -84,6 +84,7 @@ and sales challans from a single platform.
 ---
 
 ## 📁 Project Structure
+
 fundsroom-erp/
 ├── backend/
 │ ├── index.js # Main server file with all APIs
@@ -102,6 +103,7 @@ fundsroom-erp/
 ├── Fundsroom ERP APIs.postman_collection.json
 └── README.md
 
+
 ---
 
 ## 🚀 How to Run Locally
@@ -110,15 +112,18 @@ fundsroom-erp/
 ```bash
 git clone https://github.com/deekshithaboyapally-bit/fundsroom-erp.git
 cd fundsroom-erp
+
 Step 2: Setup Backend
 cd backend
 npm install
+
 Create a .env file inside the backend folder:
 DATABASE_URL=your_neon_postgresql_connection_string
 PORT=5000
 Start the backend server:
 node index.js
 Backend runs at: http://localhost:5000
+
 Step 3: Setup Frontend
 Open a new terminal:
 cd frontend
@@ -127,39 +132,43 @@ npm start
 Frontend runs at: http://localhost:3000
 
 🔌 API Endpoints
-Authentication
-Method	Endpoint	Description
-POST	/auth/login	Login and get JWT token
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/auth/login` | Login and get JWT token |
 
-Customers
-Method	Endpoint	Description
-GET	/customers	Get all customers (supports search)
-POST	/customers	Add new customer
-GET	/customers/:id	Get customer by ID
-PUT	/customers/:id	Update customer
-POST	/customers/:id/notes	Add follow-up note
+### Customers
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/customers` | Get all customers (supports search) |
+| POST | `/customers` | Add new customer |
+| GET | `/customers/:id` | Get customer by ID |
+| PUT | `/customers/:id` | Update customer |
+| POST | `/customers/:id/notes` | Add follow-up note |
 
-Products
-Method	Endpoint	Description
-GET	/products	Get all products (supports search)
-POST	/products	Add new product
-GET	/products/:id	Get product by ID
-PUT	/products/:id	Update product
+### Products
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/products` | Get all products (supports search) |
+| POST | `/products` | Add new product |
+| GET | `/products/:id` | Get product by ID |
+| PUT | `/products/:id` | Update product |
 
-Challans
-Method	Endpoint	Description
-GET	/challans	Get all challans
-POST	/challans	Create new challan
-GET	/challans/:id	Get challan with items
-PUT	/challans/:id	Update challan status
+### Challans
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/challans` | Get all challans |
+| POST | `/challans` | Create new challan |
+| GET | `/challans/:id` | Get challan with items |
+| PUT | `/challans/:id` | Update challan status |
 
-
-🔑 Test Login Credentials
-Role	Email	Password
-Admin	admin@test.com	Admin@123
-Sales	sales@test.com	Sales@123
-Warehouse	warehouse@test.com	Warehouse@123
-Accounts	accounts@test.com	Accounts@123
+### Test Login Credentials
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | `admin@test.com` | `Admin@123` |
+| Sales | `sales@test.com` | `Sales@123` |
+| Warehouse | `warehouse@test.com` | `Warehouse@123` |
+| Accounts | `accounts@test.com` | `Accounts@123` |
 
 🏗 Architecture
 React (Vercel)
@@ -176,38 +185,37 @@ PostgreSQL (Neon Cloud)
 Backend (.env)
 DATABASE_URL=postgresql://...
 PORT=5000
-
 ☁ Deployment Steps
 Backend (Render)
-Connect GitHub repo to Render
-Root Directory: backend
-Build Command: npm install
-Start Command: node index.js
-Add environment variable: DATABASE_URL
+1.Connect GitHub repo to Render
+2.Root Directory: backend
+3.Build Command: npm install
+4.Start Command: node index.js
+5.Add environment variable: DATABASE_URL
 
 Frontend (Vercel)
-Connect GitHub repo to Vercel
-Root Directory: frontend
-Framework: Create React App
-Deploy
+1.Connect GitHub repo to Vercel
+2.Root Directory: frontend
+3.Framework: Create React App
+4.Deploy
 
 ⚠ Known Limitations
-Passwords stored as plain text (bcrypt hashing should be added for production)
-No role-based route protection on frontend yet
-No pagination on lists (fine for small datasets)
-Challan cannot be edited or deleted after creation
-No PDF invoice export
-No product image upload
-Render free tier sleeps after inactivity (first request may take 20–30 seconds)
+.Passwords stored as plain text (bcrypt hashing should be added for production)
+.No role-based route protection on frontend yet
+.No pagination on lists (fine for small datasets)
+.Challan cannot be edited or deleted after creation
+.No PDF invoice export
+.No product image upload
+.Render free tier sleeps after inactivity (first request may take 20–30 seconds)
 
 📮 Postman Collection
-Import the file Fundsroom ERP APIs.postman_collection.json into Postman to test all APIs directly.
+.Import the file Fundsroom ERP APIs.postman_collection.json into Postman to test all APIs directly.
 
 🔮 What I Would Improve Next
-Add bcrypt password hashing
-Add role-based access control middleware
-Add pagination for large datasets
-Add PDF invoice export
-Add edit/delete functionality for challans
-Add frontend form validation
-Add unit tests for APIs
+.Add bcrypt password hashing
+.Add role-based access control middleware
+.Add pagination for large datasets
+.Add PDF invoice export
+.Add edit/delete functionality for challans
+.Add frontend form validation
+.Add unit tests for APIs   
