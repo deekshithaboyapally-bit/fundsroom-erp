@@ -16,7 +16,7 @@ const Products = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/products?search=${search}`);
+        const res = await axios.get(`https://fundsroom-erp-cm0q.onrender.com/products?search=${search}`);
         setProducts(res.data);
       } catch (err) {
         console.error(err);
@@ -28,7 +28,7 @@ const Products = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/products', form);
+      await axios.post('https://fundsroom-erp-cm0q.onrender.com/products', form);
       alert('Product added ✅');
       setShowForm(false);
       setSearch('');

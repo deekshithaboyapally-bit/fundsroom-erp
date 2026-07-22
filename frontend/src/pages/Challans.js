@@ -24,7 +24,7 @@ const Challans = () => {
 
   const fetchChallans = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/challans');
+      const res = await axios.get('https://fundsroom-erp-cm0q.onrender.com/challans');
       setChallans(res.data);
     } catch (err) {
       console.error(err);
@@ -33,7 +33,7 @@ const Challans = () => {
 
   const fetchCustomers = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/customers');
+      const res = await axios.get('https://fundsroom-erp-cm0q.onrender.com/customers');
       setCustomers(res.data);
     } catch (err) {
       console.error(err);
@@ -42,7 +42,7 @@ const Challans = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/products');
+      const res = await axios.get('https://fundsroom-erp-cm0q.onrender.com/products');
       setProducts(res.data);
     } catch (err) {
       console.error(err);
@@ -71,7 +71,7 @@ const Challans = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/challans', {
+      await axios.post('https://fundsroom-erp-cm0q.onrender.com/challans', {
         ...form,
         created_by: user?.id
       });

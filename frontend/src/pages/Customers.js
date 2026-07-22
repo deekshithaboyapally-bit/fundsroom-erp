@@ -16,7 +16,7 @@ const Customers = () => {
 
   const fetchCustomers = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/customers?search=${search}`);
+      const res = await axios.get(`https://fundsroom-erp-cm0q.onrender.com/customers?search=${search}`);
       setCustomers(res.data);
     } catch (err) {
       console.error(err);
@@ -30,7 +30,7 @@ const Customers = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/customers', form);
+      await axios.post('https://fundsroom-erp-cm0q.onrender.com/customers', form);
       alert('Customer added ✅');
       setShowForm(false);
       fetchCustomers();
