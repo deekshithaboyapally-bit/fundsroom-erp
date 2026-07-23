@@ -177,6 +177,18 @@ Express REST API (Render)
      ↓ SQL queries
 PostgreSQL (Neon Cloud)
 
+## 🏗 Architecture Explanation
+
+This application follows a **3-tier architecture**:
+- **Frontend (React + Vercel):** Handles UI, routing, and state. Communicates with the backend via Axios using REST APIs. JWT tokens are stored in `localStorage` for session persistence.
+- **Backend (Node.js + Express + Render):** Exposes secure REST endpoints, validates input, handles JWT authentication, and executes business logic. All critical operations (like challan confirmation & stock reduction) are wrapped in PostgreSQL transactions to guarantee data consistency.
+- **Database (PostgreSQL + Neon Cloud):** Stores relational data across 6 normalized tables (`users`, `customers`, `products`, `stock_movements`, `challans`, `challan_items`). Product snapshots are saved at sale time to preserve historical pricing/data accuracy.
+
+**Data Flow Example (Challan Confirmation):**
+`Frontend submits challan → Backend validates → Opens DB transaction (BEGIN) → Checks stock → Reduces stock & logs movement → Saves item snapshots → Commits (COMMIT) → Returns success. If stock is insufficient, entire transaction rolls back (ROLLBACK) to prevent partial updates or negative stock.`
+
+Full API documentation, local setup instructions, and known limitations are documented in this README.
+
 .User logs in → Backend checks DB → JWT token returned → Stored in localStorage
 .Challan confirmed → Backend starts DB transaction → Checks stock → Reduces stock → Saves items → Commits
 .If stock insufficient → Transaction rolled back → Error returned to frontend
