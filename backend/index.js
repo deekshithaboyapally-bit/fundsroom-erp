@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 require("dotenv").config();
 
 const app = express();
@@ -12,10 +13,16 @@ app.use(express.json());
 // PostgreSQL Connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: true,
+  ssl: { rejectUnauthorized: false },
 });
 
-// Test DB Route
+// JWT Secret from environment
+const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
+
+// =====================================================
+// TEST ROUTES
+// =====================================================
+
 app.get("/test-db", async (req, res) => {
   try {
     const result = await pool.query("SELECT NOW()");
@@ -29,38 +36,39 @@ app.get("/test-db", async (req, res) => {
   }
 });
 
-// Basic Route
 app.get("/", (req, res) => {
   res.send("Fundsroom ERP Backend is Running ✅");
 });
 
-// LOGIN ROUTE
+// =====================================================
+// AUTHENTICATION
+// =====================================================
+
 app.post("/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const result = await pool.query(
-      "SELECT * FROM users WHERE email = $1",
-      [email]
-    );
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
 
     if (result.rows.length === 0) {
-      return res.status(401).json({ 
-        message: "Invalid email or password" 
-      });
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
     const user = result.rows[0];
 
-    if (password !== user.password) {
-      return res.status(401).json({ 
-        message: "Invalid email or password" 
-      });
-    }
+    // Accepts both plain text (old) and bcrypt hashes (new)
+const isMatch = password === user.password || await bcrypt.compare(password, user.password);
+if (!isMatch) {
+  return res.status(401).json({ message: "Invalid email or password" });
+}
 
     const token = jwt.sign(
       { id: user.id, role: user.role },
-      "supersecretkey",
+      JWT_SECRET,
       { expiresIn: "1h" }
     );
 
@@ -74,21 +82,26 @@ app.post("/auth/login", async (req, res) => {
         role: user.role,
       },
     });
-
   } catch (error) {
-    console.error(error);
+    console.error("Login error:", error);
     res.status(500).json({ message: "Server error ❌" });
   }
 });
-// ===================== CUSTOMERS =====================
 
-// ADD CUSTOMER
+// =====================================================
+// CUSTOMERS
+// =====================================================
+
 app.post("/customers", async (req, res) => {
   try {
     const {
       name, mobile, email, business_name, gst_number,
       customer_type, address, status, follow_up_date, notes
     } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ message: "Customer name is required" });
+    }
 
     const result = await pool.query(
       `INSERT INTO customers 
@@ -99,68 +112,69 @@ app.post("/customers", async (req, res) => {
 
     res.status(201).json({ message: "Customer added ✅", customer: result.rows[0] });
   } catch (error) {
-    console.error(error);
+    console.error("Add customer error:", error);
     res.status(500).json({ message: "Error adding customer ❌" });
   }
 });
 
-// GET ALL CUSTOMERS (with search)
 app.get("/customers", async (req, res) => {
   try {
     const { search } = req.query;
-    let query = "SELECT * FROM customers";
+    let query = "SELECT * FROM customers ORDER BY created_at DESC";
     let params = [];
 
     if (search) {
-      query = "SELECT * FROM customers WHERE name ILIKE $1 OR email ILIKE $1 OR mobile LIKE $1";
+      query = `SELECT * FROM customers 
+               WHERE name ILIKE $1 OR email ILIKE $1 OR mobile LIKE $1 
+               ORDER BY created_at DESC`;
       params = [`%${search}%`];
     }
 
     const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (error) {
-    console.error(error);
+    console.error("Get customers error:", error);
     res.status(500).json({ message: "Error fetching customers ❌" });
   }
 });
 
-// GET CUSTOMER BY ID
 app.get("/customers/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query("SELECT * FROM customers WHERE id = $1", [id]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "Customer not found" });
     }
     res.json(result.rows[0]);
   } catch (error) {
-    console.error(error);
+    console.error("Get customer error:", error);
     res.status(500).json({ message: "Error ❌" });
   }
 });
 
-// EDIT CUSTOMER
 app.put("/customers/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { name, mobile, email, status, notes } = req.body;
 
     const result = await pool.query(
-      `UPDATE customers 
-       SET name=$1, mobile=$2, email=$3, status=$4, notes=$5 
+      `UPDATE customers SET name=$1, mobile=$2, email=$3, status=$4, notes=$5 
        WHERE id=$6 RETURNING *`,
       [name, mobile, email, status, notes, id]
     );
 
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
     res.json({ message: "Customer updated ✅", customer: result.rows[0] });
   } catch (error) {
-    console.error(error);
+    console.error("Update customer error:", error);
     res.status(500).json({ message: "Error updating ❌" });
   }
 });
 
-// ADD FOLLOW-UP NOTE
 app.post("/customers/:id/notes", async (req, res) => {
   try {
     const { id } = req.params;
@@ -171,21 +185,28 @@ app.post("/customers/:id/notes", async (req, res) => {
       [notes, id]
     );
 
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
     res.json({ message: "Note added ✅", customer: result.rows[0] });
   } catch (error) {
-    console.error(error);
+    console.error("Add note error:", error);
     res.status(500).json({ message: "Error ❌" });
   }
 });
-// ===================== PRODUCTS =====================
 
-// ADD PRODUCT
+// =====================================================
+// PRODUCTS
+// =====================================================
+
 app.post("/products", async (req, res) => {
   try {
-    const {
-      name, sku, category, unit_price,
-      current_stock, min_stock_alert, location
-    } = req.body;
+    const { name, sku, category, unit_price, current_stock, min_stock_alert, location } = req.body;
+
+    if (!name || !sku) {
+      return res.status(400).json({ message: "Product name and SKU are required" });
+    }
 
     const result = await pool.query(
       `INSERT INTO products 
@@ -194,130 +215,113 @@ app.post("/products", async (req, res) => {
       [name, sku, category, unit_price, current_stock, min_stock_alert, location]
     );
 
-    res.status(201).json({ 
-      message: "Product added ✅", 
-      product: result.rows[0] 
-    });
+    res.status(201).json({ message: "Product added ✅", product: result.rows[0] });
   } catch (error) {
-    console.error(error);
+    console.error("Add product error:", error);
     res.status(500).json({ message: "Error adding product ❌" });
   }
 });
 
-// GET ALL PRODUCTS (with search)
 app.get("/products", async (req, res) => {
   try {
     const { search } = req.query;
-    let query = "SELECT * FROM products";
+    let query = "SELECT * FROM products ORDER BY created_at DESC";
     let params = [];
 
     if (search) {
-      query = `SELECT * FROM products 
-               WHERE name ILIKE $1 OR sku ILIKE $1`;
+      query = `SELECT * FROM products WHERE name ILIKE $1 OR sku ILIKE $1 ORDER BY created_at DESC`;
       params = [`%${search}%`];
     }
 
     const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (error) {
-    console.error(error);
+    console.error("Get products error:", error);
     res.status(500).json({ message: "Error fetching products ❌" });
   }
 });
 
-// GET PRODUCT BY ID
 app.get("/products/:id", async (req, res) => {
   try {
     const { id } = req.params;
+    const result = await pool.query("SELECT * FROM products WHERE id = $1", [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error("Get product error:", error);
+    res.status(500).json({ message: "Error ❌" });
+  }
+});
+
+app.put("/products/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, category, unit_price, min_stock_alert, location } = req.body;
+
     const result = await pool.query(
-      "SELECT * FROM products WHERE id = $1", 
-      [id]
+      `UPDATE products 
+       SET name=$1, category=$2, unit_price=$3, min_stock_alert=$4, location=$5 
+       WHERE id=$6 RETURNING *`,
+      [name, category, unit_price, min_stock_alert, location, id]
     );
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    res.json(result.rows[0]);
+    res.json({ message: "Product updated ✅", product: result.rows[0] });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error ❌" });
-  }
-});
-
-// EDIT PRODUCT
-app.put("/products/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { 
-      name, category, unit_price, 
-      min_stock_alert, location 
-    } = req.body;
-
-    const result = await pool.query(
-      `UPDATE products 
-       SET name=$1, category=$2, unit_price=$3, 
-           min_stock_alert=$4, location=$5 
-       WHERE id=$6 RETURNING *`,
-      [name, category, unit_price, min_stock_alert, location, id]
-    );
-
-    res.json({ 
-      message: "Product updated ✅", 
-      product: result.rows[0] 
-    });
-  } catch (error) {
-    console.error(error);
+    console.error("Update product error:", error);
     res.status(500).json({ message: "Error updating ❌" });
   }
 });
 
-// LOW STOCK ALERT
 app.get("/products/low-stock", async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT * FROM products 
-       WHERE current_stock <= min_stock_alert`
+      `SELECT * FROM products WHERE current_stock <= min_stock_alert`
     );
     res.json(result.rows);
   } catch (error) {
-    console.error(error);
+    console.error("Low stock error:", error);
     res.status(500).json({ message: "Error ❌" });
   }
 });
-// ===================== CHALLANS =====================
 
-// CREATE CHALLAN
+// =====================================================
+// CHALLANS
+// =====================================================
+
 app.post("/challans", async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
 
     const { customer_id, items, status, created_by } = req.body;
-    // items = [{ product_id, quantity }]
 
-    // Auto generate challan number
+    if (!customer_id || !items || items.length === 0) {
+      return res.status(400).json({ message: "Customer and at least one item are required" });
+    }
+
     const challanNumber = "CHL-" + Date.now();
 
-    // Calculate total quantity
     let totalQuantity = 0;
     items.forEach(item => {
       totalQuantity += item.quantity;
     });
 
-    // Create challan
     const challanResult = await client.query(
-      `INSERT INTO challans 
-       (challan_number, customer_id, status, total_quantity, created_by)
+      `INSERT INTO challans (challan_number, customer_id, status, total_quantity, created_by)
        VALUES ($1,$2,$3,$4,$5) RETURNING *`,
       [challanNumber, customer_id, status, totalQuantity, created_by]
     );
 
     const challan = challanResult.rows[0];
 
-    // Process each item
     for (const item of items) {
-      // Get product details (snapshot)
       const productResult = await client.query(
         "SELECT * FROM products WHERE id = $1",
         [item.product_id]
@@ -325,14 +329,11 @@ app.post("/challans", async (req, res) => {
 
       if (productResult.rows.length === 0) {
         await client.query("ROLLBACK");
-        return res.status(404).json({ 
-          message: `Product ID ${item.product_id} not found` 
-        });
+        return res.status(404).json({ message: `Product ID ${item.product_id} not found` });
       }
 
       const product = productResult.rows[0];
 
-      // If confirmed → check and reduce stock
       if (status === "Confirmed") {
         if (product.current_stock < item.quantity) {
           await client.query("ROLLBACK");
@@ -341,54 +342,37 @@ app.post("/challans", async (req, res) => {
           });
         }
 
-        // Reduce stock
         await client.query(
           "UPDATE products SET current_stock = current_stock - $1 WHERE id = $2",
           [item.quantity, item.product_id]
         );
 
-        // Log stock movement
         await client.query(
-          `INSERT INTO stock_movements 
-           (product_id, quantity, movement_type, reason, created_by)
+          `INSERT INTO stock_movements (product_id, quantity, movement_type, reason, created_by)
            VALUES ($1,$2,'OUT','Challan: ' || $3, $4)`,
           [item.product_id, item.quantity, challanNumber, created_by]
         );
       }
 
-      // Save challan item with product snapshot
       await client.query(
-        `INSERT INTO challan_items 
-         (challan_id, product_id, product_name, product_sku, unit_price, quantity)
+        `INSERT INTO challan_items (challan_id, product_id, product_name, product_sku, unit_price, quantity)
          VALUES ($1,$2,$3,$4,$5,$6)`,
-        [
-          challan.id,
-          item.product_id,
-          product.name,
-          product.sku,
-          product.unit_price,
-          item.quantity
-        ]
+        [challan.id, item.product_id, product.name, product.sku, product.unit_price, item.quantity]
       );
     }
 
     await client.query("COMMIT");
-
-    res.status(201).json({
-      message: "Challan created ✅",
-      challan
-    });
+    res.status(201).json({ message: "Challan created ✅", challan });
 
   } catch (error) {
     await client.query("ROLLBACK");
-    console.error(error);
+    console.error("Create challan error:", error);
     res.status(500).json({ message: "Error creating challan ❌" });
   } finally {
     client.release();
   }
 });
 
-// GET ALL CHALLANS
 app.get("/challans", async (req, res) => {
   try {
     const result = await pool.query(
@@ -399,12 +383,11 @@ app.get("/challans", async (req, res) => {
     );
     res.json(result.rows);
   } catch (error) {
-    console.error(error);
+    console.error("Get challans error:", error);
     res.status(500).json({ message: "Error ❌" });
   }
 });
 
-// GET CHALLAN BY ID (with items)
 app.get("/challans/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -426,18 +409,13 @@ app.get("/challans/:id", async (req, res) => {
       [id]
     );
 
-    res.json({
-      challan: challan.rows[0],
-      items: items.rows
-    });
-
+    res.json({ challan: challan.rows[0], items: items.rows });
   } catch (error) {
-    console.error(error);
+    console.error("Get challan error:", error);
     res.status(500).json({ message: "Error ❌" });
   }
 });
 
-// UPDATE CHALLAN STATUS
 app.put("/challans/:id", async (req, res) => {
   const client = await pool.connect();
   try {
@@ -446,11 +424,7 @@ app.put("/challans/:id", async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    // Get current challan
-    const challanResult = await client.query(
-      "SELECT * FROM challans WHERE id = $1",
-      [id]
-    );
+    const challanResult = await client.query("SELECT * FROM challans WHERE id = $1", [id]);
 
     if (challanResult.rows.length === 0) {
       return res.status(404).json({ message: "Challan not found" });
@@ -458,24 +432,15 @@ app.put("/challans/:id", async (req, res) => {
 
     const challan = challanResult.rows[0];
 
-    // If confirming → reduce stock
     if (status === "Confirmed" && challan.status === "Draft") {
-      const items = await client.query(
-        "SELECT * FROM challan_items WHERE challan_id = $1",
-        [id]
-      );
+      const items = await client.query("SELECT * FROM challan_items WHERE challan_id = $1", [id]);
 
       for (const item of items.rows) {
-        const product = await client.query(
-          "SELECT * FROM products WHERE id = $1",
-          [item.product_id]
-        );
+        const product = await client.query("SELECT * FROM products WHERE id = $1", [item.product_id]);
 
         if (product.rows[0].current_stock < item.quantity) {
           await client.query("ROLLBACK");
-          return res.status(400).json({
-            message: `Insufficient stock for ${item.product_name}`
-          });
+          return res.status(400).json({ message: `Insufficient stock for ${item.product_name}` });
         }
 
         await client.query(
@@ -485,27 +450,26 @@ app.put("/challans/:id", async (req, res) => {
       }
     }
 
-    // Update status
     const result = await client.query(
       "UPDATE challans SET status=$1 WHERE id=$2 RETURNING *",
       [status, id]
     );
 
     await client.query("COMMIT");
-
-    res.json({ 
-      message: "Challan updated ✅", 
-      challan: result.rows[0] 
-    });
+    res.json({ message: "Challan updated ✅", challan: result.rows[0] });
 
   } catch (error) {
     await client.query("ROLLBACK");
-    console.error(error);
+    console.error("Update challan error:", error);
     res.status(500).json({ message: "Error ❌" });
   } finally {
     client.release();
   }
 });
+
+// =====================================================
+// START SERVER
+// =====================================================
 
 const PORT = process.env.PORT || 5000;
 
