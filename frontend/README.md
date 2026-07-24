@@ -211,14 +211,17 @@ Frontend (Vercel)
 3.Framework: Create React App
 4.Deploy
 
-⚠ Known Limitations
-.Passwords stored as plain text (bcrypt hashing should be added for production)
-.No role-based route protection on frontend yet
-.No pagination on lists (fine for small datasets)
-.Challan cannot be edited or deleted after creation
-.No PDF invoice export
-.No product image upload
-.Render free tier sleeps after inactivity (first request may take 20–30 seconds)
+## 🔐 Security & Authentication
+- JWT-based stateless authentication with role payload (`Admin`, `Sales`, `Warehouse`, `Accounts`)
+- Passwords are being migrated to `bcryptjs` (10 salt rounds). A dual-mode verification fallback is temporarily active to ensure zero downtime during migration. Plain-text fallback will be removed once all records are fully hashed.
+
+## ⚠ Known Limitations & Roadmap
+- ✅ Password hashing migration in progress (bcryptjs implemented with safe fallback)
+- No role-based route protection on frontend yet (JWT payload ready for middleware)
+- No pagination on lists (optimized for small datasets)
+- Challans cannot be edited/deleted after creation
+- No PDF invoice export or AWS S3 image upload (bonus features)
+- Render free tier sleeps after inactivity (first request may take 20–30s)
 
 📮 Postman Collection
 .Import the file Fundsroom ERP APIs.postman_collection.json into Postman to test all APIs directly.
